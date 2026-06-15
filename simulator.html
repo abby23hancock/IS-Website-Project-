@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wakesurf Pocket Rider Game</title>
+    <!-- Links to your main styles to keep the footer and base look clean -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* --- GAME SPECIFIC STYLES --- */
+        .game-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            max-width: 650px;
+            text-align: center;
+        }
+        #gameCanvas {
+            background: linear-gradient(to bottom, #7f7f7f 0%, #ebf8ff 15%, #2b6cb0 100%);
+            border: 4px solid #1a365d;
+            border-radius: 6px;
+            display: block;
+            margin: 15px auto;
+            max-width: 100%;
+        }
+        .score-board {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a365d;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .btn-controls {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .game-btn {
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .game-btn:active {
+            background-color: #1a365d;
+        }
+        .instructions {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <h1 style="text-align: center;">Wakesurf Pocket Rider</h1>
+        <p style="text-align: center;">Stay in the clean curl of the wake and dodge the obstacles!</p>
+
+        <div class="game-card">
+            <div class="score-board">
+                <div>Score: <span id="scoreVal">0</span></div>
+                <div>High Score: <span id="highScoreVal">0</span></div>
+            </div>
+
+            <!-- The game screen view -->
+            <canvas id="gameCanvas" width="500" height="350"></canvas>
+
+            <div class="instructions">
+                <strong>Controls:</strong> Use your keyboard <strong>&larr; Left</strong> and <strong>Right &rarr;</strong> Arrow keys, or click the buttons below to steer.
+            </div>
+
+            <!-- Mobile-friendly / Clickable button controls -->
+            <div class="btn-controls">
+                <button class="game-btn" id="moveLeftBtn">&larr; Move Left</button>
+                <button class="game-btn" id="startBtn" style="background-color: #2f855a;">Start / Restart</button>
+                <button class="game-btn" id="moveRightBtn">Move Right &rarr;</button>
+            </div>
+        </div>
+        
+        <p style="text-align: center; margin-top: 20px;">
+            <a href="scratch.html" style="color: #2b6cb0; text-decoration: none; font-weight: bold;">&larr; Back to Scratch Page</a>
+        </p>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Abby Hancock. All rights reserved.</p>
+    </footer>
+
+    <!-- --- GAME ENGINE (JavaScript) --- -->
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const scoreVal = document.getElementById('scoreVal');
+        const highScoreVal = document.getElementById('highScoreVal');
+        const startBtn = document.getElementById('startBtn');
+        const moveLeftBtn = document.getElementById('moveLeftBtn');
+        const moveRightBtn = document.getElementById('moveRightBtn');
+
+        // Game Settings
+        let surfer = { x: 250, y: 240, width: 30, height: 50, speed: 6 };
+        let obstacles = [];
+        let score = 0;
+        let highScore = 0;
+        let gameActive = false;
+        let spawnTimer = 0;
+        let keys = {};
+
+        // Track Keyboard presses
+        window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+        // Button events for clicking/holding mouse
+        let moveLeftInterval, moveRightInterval;
+        moveLeftBtn.addEventListener('mousedown', () => { moveLeftInterval = setInterval(() => surfer.x = Math.max(80, surfer.x - surfer.speed), 20); });
+        moveRightBtn.addEventListener('mousedown', () => { moveRightInterval = setInterval(() => surfer.x = Math.min(390, surfer.x + surfer.speed), 20); });
+        window.addEventListener('mouseup', () => { clearInterval(moveLeftInterval); clearInterval(moveRightInterval); });
+
+        startBtn.addEventListener('click', () => {
+            if (!gameActive) startGame();
+        });
+
+        function startGame() {
+            score = 0;
+            obstacles = [];
+            surfer.x = 250;
+            gameActive = true;
+            scoreVal.innerText = score;
+            startBtn.blur(); // Remove button focus
+        }
+
+        function createObstacle() {
+            // Spawn obstacles randomly across the wake path
+            let laneX = Math.floor(Math.random() * (370 - 90) + 90);
+            obstacles.push({
+                x: laneX,
+                y: 60, // Starts at top of the wave view
+                width: 20,
+                height: 20,
+                speed: 3 + (score * 0.1) // Speeds up gradually as score increases
+            });
+        }
+
+        function detectCollision(obj1, obj2) {
+            return (obj1.x < obj2.x + obj2.width &&
+                    obj1.x + obj1.width > obj2.x &&
+                    obj1.y < obj2.y + obj2.height &&
+                    obj1.y + obj1.height > obj2.y);
+        }
+
+        // Main game updating loop
+        function updateGame() {
+            if (gameActive) {
+                // Moving Left / Right
+                if (keys['ArrowLeft']) surfer.x = Math.max(80, surfer.x - surfer.speed);
+                if (keys['ArrowRight']) surfer.x = Math.min(390, surfer.x + surfer.speed);
+
+                // Increment score simply by surviving inside the clean pocket
+                if (surfer.x >= 120 && surfer.x <= 360) {
+                    score++;
+                    scoreVal.innerText = score;
+                } else {
+                    // Penalty text if drifting completely out of the curl wave boundaries
+                    score = Math.max(0, score - 1);
+                    scoreVal.innerText = score;
+                }
+
+                // Handle Obstacles
+                spawnTimer++;
+                if (spawnTimer % 50 === 0) {
+                    createObstacle();
+                }
+
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    obstacles[i].y += obstacles[i].speed;
+
+                    // Check for hitting debris
+                    if (detectCollision(surfer, obstacles[i])) {
+                        gameActive = false;
+                        if (score > highScore) {
+                            highScore = score;
+                            highScoreVal.innerText = highScore;
+                        }
+                    }
+
+                    // Clear old entries out of memory when they fall off screen
+                    if (obstacles[i].y > canvas.height) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+            }
+            
+            drawGame();
+            requestAnimationFrame(updateGame);
+        }
+
+        // Draw everything onto Canvas element
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Boat Platform Hull (At the top)
+            ctx.fillStyle = '#1a202c';
+            ctx.fillRect(0, 0, canvas.width, 55);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '14px Arial';
+            ctx.fillText("--- Centurion Boat Transom Platform ---", 130, 32);
+
+            // Draw Wake Pocket boundaries (The Safe Zones)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'; // Spray mist lines
+            ctx.fillRect(80, 55, 40, canvas.height); 
+            ctx.fillRect(380, 55, 40, canvas.height);
+
+            // Draw Surfer Avatar (Simple sleek surfboard representation)
+            ctx.fillStyle = '#e53e3e'; // Red board tint
+            ctx.fillRect(surfer.x, surfer.y, surfer.width, surfer.height);
+            ctx.fillStyle = '#ffffff'; // Board Stripe detailing
+            ctx.fillRect(surfer.x + 12, surfer.y, 6, surfer.height);
+
+            // Draw Obstacles (Floating logs/debris)
+            ctx.fillStyle = '#744210'; // Brown debris
+            for (let obs of obstacles) {
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            }
+
+            // Draw Game Status Overlays
+            if (!gameActive) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '22px Arial';
+                ctx.fillText("Wakesurf Pocket Rider", 145, 150);
+                ctx.font = '16px Arial';
+                ctx.fillText("Click 'Start' to Ride the Wake!", 150, 190);
+            } else if (surfer.x < 120 || surfer.x > 360) {
+                // Danger alert indicator
+                ctx.fillStyle = '#e53e3e';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText("⚠️ FALLING OUT OF WAVE POCKET!", 120, 90);
+            }
+        }
+
+        // Boot system update loop on file open
+        updateGame();
+    </script>
+</body>
+</html>

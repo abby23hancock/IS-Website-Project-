@@ -1,0 +1,141 @@
+/* --- Reset & Global Styles --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333333;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Navigation Bar --- */
+header {
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 10%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a365d; /* Professional Deep Blue */
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #4a5568;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover, .active {
+    color: #2b6cb0; /* Highlight Accent Blue */
+}
+
+/* --- Hero Section --- */
+.hero {
+    background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+    color: #ffffff;
+    padding: 80px 10%;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 25px;
+    opacity: 0.9;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #ffffff;
+    color: #2b6cb0;
+    padding: 10px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* --- Main Content Container --- */
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+    flex: 1; /* Pushes footer to the bottom if page content is short */
+}
+
+.container h1, .container h2 {
+    color: #1a365d;
+    margin-bottom: 20px;
+}
+
+/* --- Footer --- */
+footer {
+    background-color: #1a365d;
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    margin-top: auto;
+}
+
+/* --- Home Page Image Scaling --- */
+.home-profile-img {
+    width: 100%;           /* Allows it to be fluid and responsive */
+    max-width: 650px;      /* 👈 Change this number to whatever size you want! 650px is a great middle size */
+    height: auto;          /* Crucial: keeps the picture from looking squished or stretched */
+    border-radius: 8px;    /* Optional: slightly rounds the sharp corners to match your layout style */
+    margin-top: 15px;      /* Adds a clean gap between the text and the top of the photo */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Optional: adds a soft drop shadow behind it */
+}
+
+/* --- Sports Section Grid Layout --- */
+.sports-grid {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Spreads them evenly across the row */
+    align-items: center;            /* Centers them vertically */
+    gap: 15px;                      /* Puts a clean, uniform gap between each photo */
+    width: 100%;
+    max-width: 650px;               /* Matches the exact width of your BYU picture above! */
+    margin: 15px auto 40px auto;    /* Centers the entire row on the screen */
+}
+
+/* --- Uniform Image Sizing and Cropping --- */
+.sport-pic {
+    flex: 1;                        /* Forces all 3 images to take up equal width */
+    width: 100%;
+    height: 150px;                  /* 👈 Forces them to be the exact same height! */
+    object-fit: cover;              /* 🌟 Magic trick: clips the images neatly to fit the box without stretching */
+    border-radius: 6px;             /* Softens the corners to look clean and professional */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Adds a subtle picture frame shadow */
+}
